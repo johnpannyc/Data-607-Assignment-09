@@ -1,0 +1,69 @@
+---
+title: "Data 607 Assignment 09"
+author: "Jun Pan"
+date: "October 27, 2018"
+output: html_document
+---
+
+
+Assignment - Web APIs 
+
+The New York Times web site provides a rich set of APIs, as described here:  http://developer.nytimes.com/docs You'll need to start by signing up for an API key. Your task is to choose one of the New York Times APIs, construct an interface in R to read in the JSON data, and transform it to an R dataframe. 
+
+set working enviornment
+```{r}
+if (!require('dplyr')) install.packages('dplyr')
+if (!require('stringr')) install.packages('stringr')
+if (!require('RJSONIO')) install.packages('RJSONIO')
+```
+
+Sources: http://developer.nytimes.com/
+
+Key:
+```{r}
+key <- "8ba80c2191ec4062aa14565fb5adab43"   #API Key
+```
+
+
+
+
+GET
+Get call to the API endpoint and get the feed
+```{r}
+# add url and text required for call
+url <- "https://developer.nytimes.com/most_popular_api_v2.json"
+df <- paste0(url, "?")
+
+# make call
+feed <- fromJSON(paste0(df, handler = NULL, default.size=200, depth=350,allowComments=TRUE, key))
+```
+
+make a datafram
+```{r}
+sub <- feed$results
+sub$pub_date <- unlist(str_extract(sub$published_date, ".+?(?=T)"))
+sub$pub_time <- unlist(str_extract(sub$published_date, "(?<=T)(.*)"))
+
+sub <- sub %>% 
+    filter(section == "Movies") %>% 
+    select(title, abstract, byline, url, pub_date, pub_time)
+```
+
+API scrabed data
+```{r}
+knitr::kable(sub)
+```
+
+```{r}
+class(sub)
+```
+
+```{r}
+head(sub)
+```
+
+```{r}
+sub
+```
+
+
